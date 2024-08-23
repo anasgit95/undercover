@@ -1,4 +1,4 @@
-import React from 'react';
+import React ,{useEffect} from 'react';
 import Header from './components/Header';
 import GamePage from './pages/GamePage';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
@@ -15,7 +15,22 @@ const theme = createTheme({
   },
 });
 
+
+
 function App() {
+  useEffect(() => {
+    const handleBeforeUnload = (event) => {
+      event.preventDefault();
+      event.returnValue = ''; // Nécessaire pour certains navigateurs
+    };
+  
+    window.addEventListener('beforeunload', handleBeforeUnload);
+  
+    // Nettoyage de l'événement quand le composant est démonté
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
