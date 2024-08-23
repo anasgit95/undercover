@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, Grid, Card, CardContent, Typography, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Alert } from '@mui/material';
 import PlayerForm from '../components/PlayerForm';
 import dictionary from '../words.json'; // Assurez-vous que le chemin est correct
 import './GamePage.css'; // Fichier CSS pour les animations
 
 const GamePage = () => {
-  const [players, setPlayers] = useState([]);
+  const [players, setPlayers] = useState(['anas', 'ahmed', 'dhekra', 'syrine', 'lamis']);
   const [gameStarted, setGameStarted] = useState(false);
   const [cards, setCards] = useState([]);
   const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
@@ -15,6 +15,20 @@ const GamePage = () => {
   const [showGuessPopup, setShowGuessPopup] = useState(false);
   const [correctGuess, setCorrectGuess] = useState(false);
   const [resetConfirmOpen, setResetConfirmOpen] = useState(false);
+  const [showCongratulations, setShowCongratulations] = useState(false);
+
+  useEffect(() => {
+    if (showCongratulations) {
+      // Attendre 3 secondes, puis redémarrer le jeu automatiquement
+      const timer = setTimeout(() => {
+        setShowCongratulations(false);
+        startGame(); // Redémarre le jeu après l'affichage de la popup
+      }, 3000);
+
+      // Nettoyer le timer si le composant est démonté
+      return () => clearTimeout(timer);
+    }
+  }, [showCongratulations]);
 
   const handleViewRole = () => {
     setShowRole(true);
@@ -25,6 +39,12 @@ const GamePage = () => {
   };
 
   const startGame = () => {
+    setCorrectGuess(false);
+    setResetConfirmOpen(false);
+    setCurrentPlayerIndex(0);
+    setGuess('');
+    setShowCongratulations(false); // Réinitialise l'état de félicitations
+
     if (players.length < 4) {
       alert('Il faut au moins 4 joueurs pour commencer le jeu.');
       return;
@@ -87,6 +107,7 @@ const GamePage = () => {
     const correctWord = dictionary[0].undercover;
     if (guess.toLowerCase() === correctWord.toLowerCase()) {
       setCorrectGuess(true);
+      setShowCongratulations(true); // Afficher le popup de félicitations
     } else {
       setCorrectGuess(false);
     }
@@ -99,9 +120,7 @@ const GamePage = () => {
 
   const confirmResetGame = () => {
     setResetConfirmOpen(false);
-    setGameStarted(false);
-    setPlayers([]);
-    setCards([]);
+    startGame();
     localStorage.removeItem('cards');
   };
 
@@ -142,7 +161,7 @@ const GamePage = () => {
                     {card.revealed ? (
                       <>
                         <Typography variant="h6">{card.player}</Typography>
-                        <Typography variant="body1">{card.mot}</Typography>
+                        <Typography variant="body1">{card.role}</Typography>
                       </>
                     ) : (
                       <Typography variant="h6">{card.player}</Typography>
@@ -197,10 +216,17 @@ const GamePage = () => {
             </DialogActions>
           </Dialog>
 
+          <Dialog open={showCongratulations} onClose={() => setShowCongratulations(false)}>
+            <DialogTitle>Félicitations !</DialogTitle>
+            <DialogContent>
+              <Typography variant="h6">Mr. White a deviné correctement le mot. Le jeu va redémarrer !</Typography>
+            </DialogContent>
+          </Dialog>
+
           <Dialog open={resetConfirmOpen} onClose={cancelResetGame}>
             <DialogTitle>Réinitialiser le jeu</DialogTitle>
             <DialogContent>
-              <Typography variant="h6">Êtes-vous sûr de vouloir réinitialiser le jeu?</Typography>
+              <Typography variant="h6">Êtes-vous sûr de vouloir réinitialiser le jeu ?</Typography>
             </DialogContent>
             <DialogActions>
               <Button onClick={confirmResetGame} color="secondary" variant="contained">
