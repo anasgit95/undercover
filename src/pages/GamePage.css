@@ -1,0 +1,43 @@
+/* GamePage.css */
+.game-container {
+    padding: 20px;
+  }
+  
+  .start-game-btn {
+    animation: fadeIn 1s ease-in-out;
+  }
+  
+  .game-card {
+    transition: transform 0.3s ease, background-color 0.3s ease;
+  }
+  
+  .game-card:hover {
+    transform: scale(1.05);
+  }
+  
+  .game-card.revealed {
+    background-color: #fff !important;
+    color: #000 !important;
+    animation: revealCard 0.5s ease forwards;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes revealCard {
+    from {
+      transform: rotateY(90deg);
+    }
+    to {
+      transform: rotateY(0);
+    }
+  }
+  

@@ -1,0 +1,23 @@
+[
+    { "undercover": "Marseille", "civil": "Paris" },
+    { "undercover": "Sac à dos", "civil": "Sac à main" },
+    { "undercover": "Cerise", "civil": "Fraise" },
+    { "undercover": "Piano", "civil": "Guitare" },
+    { "undercover": "Bateau", "civil": "Avion" },
+    { "undercover": "Chien", "civil": "Chat" },
+    { "undercover": "Banane", "civil": "Mangue" },
+    { "undercover": "Table", "civil": "Chaise" },
+    { "undercover": "Vélo", "civil": "Moto" },
+    { "undercover": "Mouton", "civil": "Chèvre" },
+    { "undercover": "Boulangerie", "civil": "Pâtisserie" },
+    { "undercover": "Lunettes", "civil": "Lentilles" },
+    { "undercover": "Crayon", "civil": "Stylo" },
+    { "undercover": "École", "civil": "Université" },
+    { "undercover": "Télévision", "civil": "Projecteur" },
+    { "undercover": "Montagne", "civil": "Colline" },
+    { "undercover": "Forêt", "civil": "Jungle" },
+    { "undercover": "Hôpital", "civil": "Clinique" },
+    { "undercover": "Camion", "civil": "Voiture" },
+    { "undercover": "Pizza", "civil": "Burger" }
+  ]
+  
