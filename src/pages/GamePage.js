@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Grid, Card, CardContent, Typography, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Alert } from '@mui/material';
 import PlayerForm from '../components/PlayerForm';
-import dictionary from '../words.json'; // Assurez-vous que le chemin est correct
-import './GamePage.css'; // Fichier CSS pour les animations
+import dictionary from '../words.json';
+import './GamePage.css';
+import undercover from '../assets/images/underover.png';
+import civil from '../assets/images/civil.png';
+import white from '../assets/images/white.png';
+import score from '../assets/images/score.png';
+import who from '../assets/images/who.jpg';
+
 
 const GamePage = () => {
-  const [players, setPlayers] = useState(['anas', 'ahmed', 'dhekra', 'syrine', 'lamis']);
+  const [players, setPlayers] = useState(['player1', 'player2', 'player3', 'player4', 'player5']);
   const [gameStarted, setGameStarted] = useState(false);
   const [cards, setCards] = useState([]);
   const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
@@ -16,16 +22,21 @@ const GamePage = () => {
   const [correctGuess, setCorrectGuess] = useState(false);
   const [resetConfirmOpen, setResetConfirmOpen] = useState(false);
   const [showCongratulations, setShowCongratulations] = useState(false);
+  const [startPlayerIndex, setStartPlayerIndex] = useState(0);
+  const [scores, setScores] = useState([]);
+
+
+   
 
   useEffect(() => {
     if (showCongratulations) {
-      // Attendre 3 secondes, puis redémarrer le jeu automatiquement
+        updateScores('Mr.White');
+
       const timer = setTimeout(() => {
         setShowCongratulations(false);
-        startGame(); // Redémarre le jeu après l'affichage de la popup
+        startGame();
       }, 3000);
 
-      // Nettoyer le timer si le composant est démonté
       return () => clearTimeout(timer);
     }
   }, [showCongratulations]);
@@ -38,12 +49,28 @@ const GamePage = () => {
     return array.sort(() => Math.random() - 0.5);
   };
 
+  const updateScores = (winningRole) => {
+    const updatedScores = { ...scores };
+    cards.forEach(card => {
+      if (winningRole === 'Civil' && card.role === 'Civil') {
+        updatedScores[card.player] = (updatedScores[card.player] || 0) + 1;
+      } else if (winningRole === 'undercover' && card.role === 'undercover') {
+        updatedScores[card.player] = (updatedScores[card.player] || 0) + 2;
+      } else if (winningRole === 'Mr.White' && card.role === 'Mr.White') {
+        updatedScores[card.player] = (updatedScores[card.player] || 0) + 3;
+      }
+    });
+    setScores(updatedScores);
+  };
+  
+
   const startGame = () => {
+    setShowRole(false)
     setCorrectGuess(false);
     setResetConfirmOpen(false);
     setCurrentPlayerIndex(0);
     setGuess('');
-    setShowCongratulations(false); // Réinitialise l'état de félicitations
+    setShowCongratulations(false);
 
     if (players.length < 4) {
       alert('Il faut au moins 4 joueurs pour commencer le jeu.');
@@ -65,9 +92,8 @@ const GamePage = () => {
     }));
 
     const shuffledRoles = shuffleArray(roles);
-    const shuffledPlayers = shuffleArray(players);
-
-    const assignedCards = shuffledPlayers.map((player, index) => ({
+ 
+    const assignedCards =  players.map((player, index) => ({
       player,
       role: shuffledRoles[index].role,
       mot: shuffledRoles[index].mot,
@@ -79,6 +105,14 @@ const GamePage = () => {
     setIsModalOpen(true);
 
     localStorage.setItem('cards', JSON.stringify(assignedCards));
+
+    // Choisir aléatoirement un joueur qui n'est pas Mr. White pour commencer
+    const nonWhitePlayers = assignedCards.filter(card => card.role !== 'Mr.White');
+    const randomStartingPlayerIndex = Math.floor(Math.random() * nonWhitePlayers.length);
+    const startingPlayer = nonWhitePlayers[randomStartingPlayerIndex].player;
+
+    const startingPlayerIndex = assignedCards.findIndex(card => card.player === startingPlayer);
+    setStartPlayerIndex(startingPlayerIndex);
   };
 
   const handleNextPlayer = () => {
@@ -97,17 +131,21 @@ const GamePage = () => {
     setCards(updatedCards);
 
     localStorage.setItem('cards', JSON.stringify(updatedCards));
+   if( updatedCards.filter(card=>!card.revealed && card.role==='Civil').length === updatedCards.filter(card=>!card.revealed).length)
+   updateScores('Civil') 
+   if( updatedCards.filter(card=>!card.revealed && card.role==='undercover').length === updatedCards.filter(card=>!card.revealed).length)
+   updateScores('Undercover') 
 
     if (updatedCards[index].role === 'Mr.White') {
       setShowGuessPopup(true);
     }
   };
-
+ 
   const handleGuessSubmit = () => {
-    const correctWord = dictionary[0].undercover;
+     const correctWord = cards.filter(card=>card.role==='Civil')[0].mot;
     if (guess.toLowerCase() === correctWord.toLowerCase()) {
       setCorrectGuess(true);
-      setShowCongratulations(true); // Afficher le popup de félicitations
+      setShowCongratulations(true);
     } else {
       setCorrectGuess(false);
     }
@@ -120,9 +158,9 @@ const GamePage = () => {
 
   const confirmResetGame = () => {
     setResetConfirmOpen(false);
+    setShowRole(false)
     startGame();
-    localStorage.removeItem('cards');
-  };
+   };
 
   const cancelResetGame = () => {
     setResetConfirmOpen(false);
@@ -155,12 +193,22 @@ const GamePage = () => {
                   sx={{
                     cursor: 'pointer',
                     textAlign: 'center',
+                    position:'relative'
                   }}
                 >
-                  <CardContent>
+                  <CardContent >
+                    {index===startPlayerIndex?<p style={{color:'red',fontSize:25,position:'absolute',background:'black',top:0,borderRadius:'50%',width:40,height:40}}>1</p> :''}
                     {card.revealed ? (
                       <>
                         <Typography variant="h6">{card.player}</Typography>
+                        {card.role==='Civil'?
+                        <img src={civil} style={{height:50}} alt="Example" />
+                        :card.role==='undercover'?
+                        <img src={undercover} style={{height:50}} alt="Example" />
+                        :<img src={white}   style={{height:50}} alt="Example" />
+
+
+                    }
                         <Typography variant="body1">{card.role}</Typography>
                       </>
                     ) : (
@@ -172,16 +220,18 @@ const GamePage = () => {
             ))}
           </Grid>
 
-          <Dialog open={isModalOpen} onClose={handleNextPlayer}>
-            <DialogTitle>Tour de {cards[currentPlayerIndex].player}</DialogTitle>
+          <Dialog open={isModalOpen} onClose={handleNextPlayer} style={{textAlign:"center",alignItems:"center"}}>
+            <DialogTitle color="#40E0D0" fontFamily='cursive'>Tour de {cards[currentPlayerIndex].player}</DialogTitle>
+            <img src={who} style={{height:80}}/>
             <DialogContent>
-              <Typography variant="h6">
-                {showRole ? `${cards[currentPlayerIndex].mot}` : "Appuyez sur 'Voir le rôle' pour découvrir votre rôle."}
+              
+              <Typography variant="h6" style={{fontWeight:"bold"}}>
+                {showRole ? `${cards[currentPlayerIndex].mot}` : ""}
               </Typography>
             </DialogContent>
-            <DialogActions>
+            <DialogActions style={{alignContent:"center",alignItems:"center",textAlign:"center"}}>
               {!showRole && (
-                <Button onClick={handleViewRole} color="primary" variant="contained">
+                <Button style={{justifyContent:"center",background:'#40E0D0',color:'white',fontWeight:'bold'}} onClick={handleViewRole} color='secondary' variant='text'>
                   Voir le rôle
                 </Button>
               )}
@@ -222,7 +272,27 @@ const GamePage = () => {
               <Typography variant="h6">Mr. White a deviné correctement le mot. Le jeu va redémarrer !</Typography>
             </DialogContent>
           </Dialog>
-
+          <div className="game-container" style={{textAlign:"center"}}>
+<img src={score} style={{maxWidth:200}}/>      
+<table className="score-table">
+        <thead>
+          <tr>
+            <th>Joueur</th>
+            <th>Score</th>
+          </tr>
+        </thead>
+        <tbody>
+          {Object.keys(scores).map((player, index) => (
+            <tr key={index}>
+              <td>{player}</td>
+              <td>{scores[player]}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      
+      {/* Le reste du code de l'interface */}
+    </div>
           <Dialog open={resetConfirmOpen} onClose={cancelResetGame}>
             <DialogTitle>Réinitialiser le jeu</DialogTitle>
             <DialogContent>
